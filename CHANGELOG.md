@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/AndreyShep2012/go-proxy/compare/v1.0.0...v1.1.0) (2024-05-01)
+
+
+### Features
+
+* **stable:** debug ([d5c6320](https://github.com/AndreyShep2012/go-proxy/commit/d5c63208826275123f3e5b1675b8122b86e0b173))
+
 # 1.0.0 (2024-05-01)
 
 
