@@ -1,0 +1,29 @@
+{
+    "scripts": {
+        "semantic-release": "semantic-release"
+    },
+    "release": {
+        "branches": [
+            "main",
+            "feat/release-cicd"
+        ],
+        "plugins": [
+            "@semantic-release/commit-analyzer",
+            "@semantic-release/release-notes-generator",
+            "@semantic-release/changelog",
+            "@semantic-release/git",
+            [
+                "@semantic-release/exec",
+                {
+                    "publishCmd": "echo \"version=${nextRelease.version}\" >> $GITHUB_OUTPUT"
+                }
+            ]
+        ]
+    },
+    "dependencies": {
+        "@semantic-release/changelog": "^6.0.3",
+        "@semantic-release/exec": "^6.0.3",
+        "@semantic-release/git": "^10.0.1",
+        "semantic-release": "^23.0.8"
+    }
+}
