@@ -17,7 +17,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20'
+          node-version: 'latest'
 
       - name: Install Semantic Release
         run: npm install semantic-release @semantic-release/git @semantic-release/changelog
@@ -41,7 +41,7 @@ jobs:
         run: make build_linux
         
       - name: Create tar package
-        run: tar -czvf go-proxy-${{ steps.semantic.outputs.version }}.tar.gz path/to/your/binary
+        run: tar -czvf go-proxy-${{ steps.semantic.outputs.version }}.tar.gz go-proxy
         
       - name: Upload Release
         uses: actions/upload-release-asset@v1
