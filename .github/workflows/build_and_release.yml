@@ -53,3 +53,4 @@ jobs:
           path: ./go-proxy-${{ steps.semantic.outputs.version }}
           name: go-proxy-${{ steps.semantic.outputs.version }}
           if-no-files-found: 'error'
+          overwrite: 'true'
