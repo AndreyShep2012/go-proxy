@@ -23,11 +23,12 @@ jobs:
         run: npm install semantic-release @semantic-release/git @semantic-release/changelog
 
       - name: Run Semantic Release
+        id: semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx semantic-release
-          echo "::set-output name=version::$(cat package.json | jq -r '.version')"
+          echo "{name}=$(cat package.json | jq -r '.version')" >> $GITHUB_OUTPUT
 
       - name: Install Go
         uses: actions/setup-go@v4
