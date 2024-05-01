@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feat/release-cicd
 
 jobs:
   build:
@@ -19,6 +18,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ">=1.22"
+    
+      - name: Print Go version
+        run: go version
+
+      - name: Build for Linux
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o go-proxy ./main.go
+
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
@@ -31,33 +41,4 @@ jobs:
         id: semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npx semantic-release
-
-      - run: echo ${{ steps.semantic.outputs.version }}
-
-      - name: Install Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 1.22
-    
-      - name: Print Go version
-        run: go version
-
-      - name: Build for Linux
-        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o go-proxy ./main.go
-        
-      - name: Create tar package
-        run: tar -czvf go-proxy-${{ steps.semantic.outputs.version }}.tar.gz go-proxy
-
-      - run: ls -lah
-        
-      - name: Upload Release
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ github.event.repository.releases_url }}
-          asset_path: ./go-proxy-${{ steps.semantic.outputs.version }}.tar.gz
-          asset_name: go-proxy-${{ steps.semantic.outputs.version }}.tar.gz
-          asset_content_type: application/gzip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
