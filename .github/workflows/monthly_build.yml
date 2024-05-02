@@ -1,6 +1,7 @@
 name: Monthly Build and Release
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '0 0 */30 * *' # Runs every 30 days
 
