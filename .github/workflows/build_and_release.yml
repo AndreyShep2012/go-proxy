@@ -42,3 +42,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
+
+      - name: Package Binary
+        run: tar -czvf go-proxy-${{ steps.semantic.outputs.version }}.tar.gz go-proxy
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./go-proxy-${{ steps.semantic.outputs.version }}.tar.gz
+          name: Release ${{ steps.semantic.outputs.version }}
+          tag_name: ${{ steps.semantic.outputs.version }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print Release URL
+        run: echo ${{ steps.create_release.outputs.url }}
