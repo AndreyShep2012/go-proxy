@@ -4,8 +4,7 @@
     },
     "release": {
         "branches": [
-            "main",
-            "feat/release-on-tag"
+            "main"
         ],
         "plugins": [
             "@semantic-release/commit-analyzer",
