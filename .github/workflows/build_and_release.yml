@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feat/release-on-tag
 
 jobs:
   build:
@@ -50,7 +49,7 @@ jobs:
       - name: Publish release tar artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ./go-proxy-${{ steps.semantic.outputs.version }}
+          path: ./go-proxy-${{ steps.semantic.outputs.version }}.tar.gz
           name: go-proxy-${{ steps.semantic.outputs.version }}
           if-no-files-found: 'error'
           overwrite: 'true'
