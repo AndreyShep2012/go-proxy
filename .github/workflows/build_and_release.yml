@@ -53,6 +53,7 @@ jobs:
         with:
           files: ./go-proxy-${{ steps.semantic.outputs.version }}.tar.gz
           name: Release ${{ steps.semantic.outputs.version }}
+          tag_name: ${{ steps.semantic.outputs.version }}
           draft: false
           prerelease: false
         env:
