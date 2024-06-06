@@ -1,0 +1,62 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    permissions:
+      contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      id-token: write # to enable use of OIDC for npm provenance
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ">=1.22"
+    
+      - name: Print Go version
+        run: go version
+
+      - name: Build for Linux
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o go-proxy ./main.go
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '>=20'
+
+      - name: Install Semantic Release
+        run: npm install semantic-release @semantic-release/git @semantic-release/exec
+
+      - name: Run Semantic Release
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
+
+      - name: Package Binary
+        run: tar -czvf go-proxy-${{ steps.semantic.outputs.version }}.tar.gz go-proxy
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./go-proxy-${{ steps.semantic.outputs.version }}.tar.gz
+          name: Release ${{ steps.semantic.outputs.version }}
+          tag_name: ${{ steps.semantic.outputs.version }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print Release URL
+        run: echo ${{ steps.create_release.outputs.url }}
