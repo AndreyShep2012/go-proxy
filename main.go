@@ -7,8 +7,14 @@ import (
 	"net/http/httputil"
 	"net/url"
 
+	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/motemen/go-loghttp"
 )
+
+type ServerConfig struct {
+	From string `yaml:"from" env:"GO_PROXY_FROM" env-default:"localhost:8090"`
+	To   string `yaml:"to" env:"GO_PROXY_TO" env-default:"localhost:9000"`
+}
 
 type Server struct {
 	proxy  *httputil.ReverseProxy
@@ -17,26 +23,39 @@ type Server struct {
 }
 
 func main() {
-	fromAddr := flag.String("from", ":8090", "proxy's listening address")
-	toAddr := flag.String("to", "http://localhost:9000", "the address this proxy will forward to")
-	verbose := flag.Bool("v", true, "more logs")
+	fromFlag := flag.String("from", "", "proxy's listening address")
+	toFlag := flag.String("to", "", "the address this proxy will forward to")
+	verboseFlag := flag.Bool("v", true, "more logs")
 	flag.Parse()
 
 	var l Logger = emptyLog{}
-	if *verbose {
+	if *verboseFlag {
 		l = logger{}
 		http.DefaultTransport = loghttp.DefaultTransport
 	}
 
-	startProxy(*fromAddr, *toAddr, l)
+	var config ServerConfig
+	err := cleanenv.ReadConfig("config.yml", &config)
+	if err != nil {
+		l.Log("Failed to load config.")
+	}
+	if *fromFlag != "" {
+		config.From = *fromFlag
+	}
+	if *toFlag != "" {
+		config.To = *toFlag
+	}
+	l.Log("Created server config:", config)
+
+	startProxy(config.From, config.To, l)
 }
 
 func startProxy(from, to string, l Logger) {
 	toUrl := parseToUrl(to)
 	proxy := httputil.NewSingleHostReverseProxy(toUrl)
 	proxy.Transport = http.DefaultTransport
-	l.Log("starting proxy server from ", from)
-	l.Log("redirect to ", to)
+	l.Log("starting proxy server on: ", from)
+	l.Log("redirecting to: ", to)
 
 	proxy.ErrorLog = l.GetLogger()
 	t := Server{
