@@ -1,6 +1,6 @@
 module github.com/AndreyShep2012/go-proxy
 
-go 1.21
+go 1.22
 
 require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
