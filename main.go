@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"log"
 	"net/http"
@@ -12,8 +13,9 @@ import (
 )
 
 type ServerConfig struct {
-	From string `yaml:"from" env:"GO_PROXY_FROM" env-default:"localhost:8090"`
-	To   string `yaml:"to" env:"GO_PROXY_TO" env-default:"localhost:9000"`
+	From          string `yaml:"from" env:"GO_PROXY_FROM" env-default:"localhost:8090"`
+	To            string `yaml:"to" env:"GO_PROXY_TO" env-default:"localhost:9000"`
+	TlsSkipVerify bool   `yaml:"tls_skip_verify" env:"GO_PROXY_TLS_SKIP_VERIFY" env-default:"false"`
 }
 
 type Server struct {
@@ -25,13 +27,13 @@ type Server struct {
 func main() {
 	fromFlag := flag.String("from", "", "proxy's listening address")
 	toFlag := flag.String("to", "", "the address this proxy will forward to")
+	tlsSkipVerifyFlag := flag.Bool("tls_skip_verify", false, "skip TLS verify")
 	verboseFlag := flag.Bool("v", true, "more logs")
 	flag.Parse()
 
 	var l Logger = emptyLog{}
 	if *verboseFlag {
 		l = logger{}
-		http.DefaultTransport = loghttp.DefaultTransport
 	}
 
 	var config ServerConfig
@@ -45,7 +47,19 @@ func main() {
 	if *toFlag != "" {
 		config.To = *toFlag
 	}
+	if *tlsSkipVerifyFlag {
+		config.TlsSkipVerify = true
+	}
 	l.Log("Created server config:", config)
+
+	// set up http transport
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{
+		InsecureSkipVerify: config.TlsSkipVerify,
+	}
+
+	if *verboseFlag {
+		http.DefaultTransport = loghttp.DefaultTransport
+	}
 
 	startProxy(config.From, config.To, l)
 }
